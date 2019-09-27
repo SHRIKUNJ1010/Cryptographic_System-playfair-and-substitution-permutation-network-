@@ -1,21 +1,94 @@
 import java.util.Scanner;
 import java.lang.Math;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.io.*;
 
-class Cryptographic_System
-{
-    public static void main(String args[])
+class Cryptographic_System {
+    public static byte[] getSHA(String input) throws NoSuchAlgorithmException {
+        // Static getInstance method is called with hashing SHA
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+        // digest() method called
+        // to calculate message digest of an input
+        // and return array of byte
+        return md.digest(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String toHexString(byte[] hash) {
+        // Convert byte array into signum representation
+        BigInteger number = new BigInteger(1, hash);
+
+        // Convert message digest into hex value
+        StringBuilder hexString = new StringBuilder(number.toString(16));
+
+        // Pad with leading zeros
+        while (hexString.length() < 32) {
+            hexString.insert(0, '0');
+        }
+
+        return hexString.toString();
+    }
+
+    public static void main(String args[]) {
+        String plaintext = new String();
+        String ciphertext = new String();
+
+        int option;
+        int a;// switching variables
+
+        Encrypt e = new Encrypt();// Objects of diffrent class
+        Decrypt d = new Decrypt();
+        Scanner s = new Scanner(System.in);
+
+    String s3 = "Shrikunj1010";//required user name
+    System.out.println("Enter UserName:");
+    String s2 = s.nextLine();
+    while(s2.equals(s3) != true)//loop until valid username is printed
     {
-    String plaintext = new String();
-    String ciphertext = new String();
+        System.out.println("!!Enter valid UserName!!");
+        s2 = s.nextLine();
+    }
 
-    int option;
-    int a;//switching variables
-
-    Encrypt e = new Encrypt();
-    Decrypt d = new Decrypt();
-    Scanner s = new Scanner(System.in);
-
+    File pass = new File("E:\\java\\hashvalue.txt");//opening file which has hash value of password
+    try {
+        Scanner sn = new Scanner(pass);
+        s3 = sn.nextLine();//scanning hash value of password and storing in string
+        sn.close();
+    } catch (FileNotFoundException e1) {
+        e1.printStackTrace();
+    }
     
+    System.out.println("Enter Password:");
+    String s1 = s.nextLine();//scanning password
+    try{
+            s1 = toHexString(getSHA(s1));//converting password to hash value
+        }
+    catch (NoSuchAlgorithmException l) {  
+            System.out.println("Exception thrown for incorrect algorithm: " + l);  
+        }
+        if(s1.equals(s3) != true)
+        {
+            System.out.println("!!Entered Password is wrong!!");
+        } 
+    while(s1.equals(s3) != true)
+    {
+        System.out.println("Enter Password:");
+        s1 = s.nextLine();//scanning password
+        try{
+            s1 = toHexString(getSHA(s1));//converting password to hash value
+        }
+        catch (NoSuchAlgorithmException l) {  
+            System.out.println("Exception thrown for incorrect algorithm: " + l);  
+        } 
+        if(s1.equals(s3) != true)
+        {
+            System.out.println("!!Entered Password is wrong!!");
+        }
+    }
+
 
     System.out.println("Select the algortihm:");
     System.out.println("1 - PlayFair Cipher");
@@ -26,7 +99,7 @@ class Cryptographic_System
         case 1:
         System.out.println("Choose Option:");
         System.out.println("1 - Encrypt Message");
-        System.out.println("2 - Dycrypt Message");
+        System.out.println("2 - Decrypt Message");
 
         a = s.nextInt();
             switch(a)
@@ -56,7 +129,7 @@ class Cryptographic_System
         case 2:
         System.out.println("Choose Option:");
         System.out.println("1 - Encrypt Message");
-        System.out.println("2 - Dycrypt Message");
+        System.out.println("2 - Decrypt Message");
 
         a = s.nextInt();
             switch(a)
@@ -240,11 +313,6 @@ class Encrypt{
 
         plaintext = plaintext.replaceAll("j","i");
 
-        if(plaintext.length() % 2 == 1)
-        {
-            plaintext = plaintext + 'x';
-        }
-
         System.out.println("Enter the key: ");
         key = s.nextLine();
 
@@ -294,6 +362,10 @@ class Encrypt{
         for(i = 0;i < plaintext.length();i += 2)
         {
             cipher[0] = plaintext.charAt(i);
+            if(i+1 >= plaintext.length())
+            {
+                plaintext += 'x';
+            }
             cipher[1] = plaintext.charAt(i+1);
             
             //taking dummy character for repeating characters
@@ -1024,6 +1096,16 @@ class Decrypt
                 b = (b - 1) % 5;
                 e = (e - 1) % 5;
 
+                if(b < 0)
+                {
+                    b += 5;
+                }
+
+                if(e < 0)
+                {
+                    e += 5;
+                }
+
                 //taking next char in same row in cyclic manner
                 plain[0] = en_block[a][b];
                 plain[1] = en_block[d][e];
@@ -1035,6 +1117,15 @@ class Decrypt
                 a = (a - 1) % 5;
                 d = (d - 1) % 5;
 
+                if(a < 0)
+                {
+                    a += 5;
+                }
+
+                if(d < 0)
+                {
+                    d += 5;
+                }
                 //taking next char in same column in cyclic manner
                 plain[0] = en_block[a][b];
                 plain[1] = en_block[d][e];
